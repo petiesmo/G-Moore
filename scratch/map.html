@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<h1>Map Test Page</h1>
+<hr>
+<script>
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const Lat1 = urlParams.get('Latitude');
+const Long1 = urlParams.get('Longitude');
+const myLatLng = {lat: Lat1, lng: Long1}
+</script>
+</head>	
+
+<body>
+<p>Map Attempt!</p><br>
+		
+<iframe
+	width="450"
+	height="250"
+	frameborder="0" style="border:0"
+	https://www.google.com/maps/embed/v1/view
+	?key=AIzaSyA-k6mhZnx_FdrG6EGK7iePGbmeS6P02VA
+	&center= myLatLng
+	&zoom=18
+	&maptype=satellite>
+</iframe><br>
+<h6>Map Caption</h6>
+</body>
+</html>
