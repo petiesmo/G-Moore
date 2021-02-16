@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-<h1>Test Page</h1>
+<title>Peter's Test Map</title>
+	<h1>Test Page</h1>
 <hr>
+<style>
+    #map{
+      height:400px;
+      width:100%;
+    }
+</style>
+<script>
+	function myFunction(val) {
+		console.log("I have changed the Site to: " + val)
+		let Lat = document.getElementById("Lat1").value
+		let Long = document.getElementById("Long1").value
+		console.log(`Lat: $(Lat), Long: $(Long)`)}
+</script>
 </head>	
 
 <body>
 <p>Hello Notepad++!</p>
-
 <form action="map.html">
-<div class="row">
-	<div class="col-md-6">
+<table>
+	<tbody>
+	<tr>
 	<label for="Site">Choose a Site:</label>
 	<select name="selectSite" id="Site" onchange="myFunction(this.value)">
 		<optgroup label="Alaska">
@@ -21,30 +35,42 @@
 		<option value="VAFB2">VAFB2</option>
 		</optgroup>
 	</select>
-<br><br>
-  <label for="Lat1">Latitude:</label><br>
-  <input type="text" id="Lat1" name="Latitude" value="0"><br>
-  <label for="Long1">Longitude:</label><br>
-  <input type="text" id="Long1" name="Longitude" value="0"><br><br>
-</div>
-<div class = "col-md-6">
-  <label for="Lat2">Latitude2:</label><br>
-  <input type="text" id="Lat2" name="Latitude2" value="0"><br>
-  <label for="Long2">Longitude2:</label><br>
-  <input type="text" id="Long2" name="Longitude2" value="0"><br><br>
-  <input type="submit" value="Submit">
-  <input type="reset" value="Reset">
-</div>
-</div>
+	</tr>
+	<tr>
+	<td class = "col-md-6">
+	<label for="Lat1">Latitude:</label><br>
+	<input type="text" id="Lat1" name="Latitude" value="0"><br>
+  	<label for="Long1">Longitude:</label><br>
+  	<input type="text" id="Long1" name="Longitude" value="0"><br><br>
+	</td>
+	<td class = "col-md-6">
+  	<label for="Lat2">Latitude2:</label><br>
+  	<input type="text" id="Lat2" name="Latitude2" value="0"><br>
+  	<label for="Long2">Longitude2:</label><br>
+  	<input type="text" id="Long2" name="Longitude2" value="0"><br><br>
+  	<input type="submit" value="Submit">
+  	<input type="reset" value="Reset">
+	</td>
+</tr>
+</tbody>
+</table>
 </form>
 
-<script>
-function myFunction(val) {
-	alert("I have changed the Site to: " + val)
-	Lat.value = val
-	Long.value = val
-}
-</script>
+<div id="map"></div>
+  <script>
+    function initMap(){
+      // Map options
+      var options = {
+        zoom:8,
+        center:{lat:42.3601,lng:-71.0589}
+      }
 
+      // New map
+      var map = new google.maps.Map(document.getElementById('map'), options);
+	}
+  </script>
+  <script async defer
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8OhoxKqPqPifoJM4bh0ztgUjxt71VGFw&callback=initMap">
+  </script>
 </body>
 </html>
