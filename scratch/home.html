@@ -7,30 +7,35 @@
 
 <body>
 <p>Hello Notepad++!</p>
-		
+
 <form action="map.html">
-<label for="Site">Choose a Site:</label>
-<select name="selectSite" id="Site" onchange="myFunction(this.value)">
-  <optgroup label="Alaska">
-    <option value="pad1">Pad 1</option>
-  </optgroup>
-  <optgroup label="California">
-    <option value="VAFB1">VAFB1</option>
-    <option value="VAFB2">VAFB2</option>
-  </optgroup>
-</select>
+<div class="row">
+	<div class="col-md-6">
+	<label for="Site">Choose a Site:</label>
+	<select name="selectSite" id="Site" onchange="myFunction(this.value)">
+		<optgroup label="Alaska">
+		<option value="pad1">Pad 1</option>
+		</optgroup>
+		<optgroup label="California">
+		<option value="VAFB1">VAFB1</option>
+		<option value="VAFB2">VAFB2</option>
+		</optgroup>
+	</select>
 <br><br>
   <label for="Lat1">Latitude:</label><br>
   <input type="text" id="Lat1" name="Latitude" value="0"><br>
   <label for="Long1">Longitude:</label><br>
   <input type="text" id="Long1" name="Longitude" value="0"><br><br>
-  
+</div>
+<div class = "col-md-6">
   <label for="Lat2">Latitude2:</label><br>
   <input type="text" id="Lat2" name="Latitude2" value="0"><br>
   <label for="Long2">Longitude2:</label><br>
   <input type="text" id="Long2" name="Longitude2" value="0"><br><br>
   <input type="submit" value="Submit">
   <input type="reset" value="Reset">
+</div>
+</div>
 </form>
 
 <script>
