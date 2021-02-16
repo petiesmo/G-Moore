@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<h1>Map Test Page</h1>
-<hr>
 <script>
+<<<<<<< HEAD
 function get_started() {	
 	const queryString = window.location.search;
 	const urlParams = new URLSearchParams(queryString);
@@ -14,11 +13,28 @@ function get_started() {
 	console.log(myLatLng)
 } //end get_started
 </script>		
+=======
+function receive() {
+    const My_API_Key = "AIzaSyD8OhoxKqPqPifoJM4bh0ztgUjxt71VGFw"
+    var queryString = window.location.search;
+    var urlParams = new URLSearchParams(queryString);
+    var Lat1 = urlParams.get('Latitude');
+    var Long1 = urlParams.get('Longitude');
+    const myLatLng = {lat: Lat1, lng: Long1};
+    alert(Lat1+", "+Long1)
+    var source = "https://maps.googleapis.com/maps/api/staticmap?&zoom=8&size=600x300&maptype=roadmap&markers=color:blue%7Clabel:S%7C"+Lat1+","+Long1+"&key="+My_API_Key+"'";
+    document.getElementbyId("MySource").innerHTML = source;
+}
+</script>
+<h1>Map Test Page</h1>
+<hr>
+>>>>>>> 5ac5373ff8f1cdaa65be53f689713dde97c6982e
 </head>	
 
 <body onload="get_started">
 
 <p>Map Attempt!</p><br>
+<<<<<<< HEAD
 
 <iframe
 	width="450"
@@ -30,6 +46,11 @@ function get_started() {
 	&zoom=18
 	&maptype=satellite>
 </iframe><br>
+=======
+		
+<div id = "MySource"> </div>
+>>>>>>> 5ac5373ff8f1cdaa65be53f689713dde97c6982e
 <h6>Map Caption</h6>
+
 </body>
 </html>
