@@ -1,41 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Peter's Test Map</title>
-	<h1>Test Page</h1>
-<hr>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+  <title>Moore's Maps</title>
+<style type="text/css">
     #map{
       height:400px;
       width:100%;
     }
 </style>
 <script>
-	//https://www.ngdc.noaa.gov/geomag/image/compass/compass_" + degrees + ".png
+	
 	function myFunction(that) {
 		//console.log("I have changed the Site to: " + val)
-		console.log(that.Latitude1.value)
-		console.log(that.Longitude1.value)
-		console.log(`Lat1: $(LatA), Long1: $(LongA)`)
+		console.log(that)
+		console.log(that)
+		console.log(`Lat1: ${Lat1.value}, Long1: ${Long1.value}`)
 		return false;}
 </script>
 </head>	
 
 <body>
+	<h1>Moore's Decline Map</h1>
+	<h4>Provide positions of Origin and Destination to determine</h4>
+	<h4>Distance and Azimuth (plus Declination correction)</h4>
+	<hr>
 <form id="LocationsForm" onsubmit='getData'>	
-<div class="span-12">
-	<fieldset style="width:200px; background-color:bisque;">
+<table>
+<tr><td valign="top">
+	<fieldset style="width:200px; background-color: bisque;">
+		<!--Future TODO: Add geolocation-->
 		<legend><strong>Location 1</strong></legend>
 		<label for="Lat1">Latitude (N):</label><br>
 		<input type="text" id="Lat1" name="Latitude1" value="0"><br>
 		<label for="Long1">Longitude (E):</label><br>
 		<input type="text" id="Long1" name="Longitude1" value="0"><br><br>
 	</fieldset>
-</div>
-<div class="span-11">
+</td>
+<td valign="top">
 	<fieldset style="width:200px; background-color: cadetblue;">
 		<legend><strong>Location 2</strong></legend>
 		<label for="Site">Choose a Site:</label>
+		<!--TODO: Load this selector from CSV/JSON -->
+		<!--Future TODO: Custom for each user, including saved locations -->
 		<select name="selectSite" id="Site" onchange="myFunction(this)">
 			<optgroup label="Alaska">
 			<option value="pad1">Pad 1</option>
@@ -50,32 +60,140 @@
 		<label for="Long2">Longitude2 (E):</label><br>
 		<input type="text" id="Long2" name="Longitude2" value="0"><br>
 	</fieldset>
-</div>
+</td>
+<td valign="top">
+	<p>
+		Location 1: Latitude: <span id="lat1"></span>°N, Longitude: <span id="lon1"></span>°E<br />
+		Location 2: Latitude: <span id="lat2"></span>°N, Longitude: <span id="lon2"></span>°E<br />
+		<div id="origin"></div>
+		<div id="dest"></div>
+		<div id="bearing"><p>°</p></div>
+		<div id="dist"></div>
+	</p>
+</td>
+</tr></table>
 <input type="submit" value="Submit">
 <input type="reset" value="Reset">
 </form>
 <br>
-<div id="Pos1"></div>
-<div id="Pos2"></div>
-<div id="map"></div>
-<script>
-const forms = document.querySelectorAll('form')
-const submitInput = forms[0].querySelector('input[type="submit"]')
-function getData(e){
-		e.preventDefault();
-		const formdata = new FormData(forms[0])
-		document.getElementById("Pos1").textContent = "Position1 Lat/Long:" + formdata.get("Latitude1") + formdata.get("Longitude1")
-		document.getElementById("Pos2").innerHTML = `$(formdata.get("Latitude2")), $(formdata.get("Longitude2")`
-		loadMap()
-}
 
-document.addEventListener('DOMContentLoaded',function(){
-	submitInput.addEventListener('click', getData, false);
-},false)
+<div id="map"></div>
+
+<script>
+ //Derived from the Google Maps API templates
+ let marker1, marker2;
+ let poly, geodesicPoly;
+ let map
+ //Default starting positions
+ var mapcenter = {lat: 14, lng: -40};
+ var pos1 = {lat: 40.714, lng: -74.006};
+ var pos2 = {lat: 48.857, lng: 2.352};
+ var compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_0.png`
+ var degrees = 76
+ 
+ function initMap() {
+   map = new google.maps.Map(document.getElementById("map"), {
+	 zoom: 2,
+	 center: mapcenter,
+   });
+   map.controls[google.maps.ControlPosition.TOP_CENTER].push(
+	 document.getElementById("info")
+   );
+    
+   //Create markers that can be dragged
+   marker1 = new google.maps.Marker({
+	 map,
+	 draggable: true,
+	 position: pos1
+   });
+
+   marker2 = new google.maps.Marker({
+	 map,
+	 draggable: true,
+	 position: pos2,
+   });
+   refitBounds(map);
+
+   google.maps.event.addListener(marker1, "position_changed", update);
+   google.maps.event.addListener(marker2, "position_changed", update);
+   //"Straight line"
+   poly = new google.maps.Polyline({
+	 strokeColor: "#FF0000",
+	 strokeOpacity: 1.0,
+	 strokeWeight: 3,
+	 map: map,
+   });
+   //Spherical arc
+   geodesicPoly = new google.maps.Polyline({
+	 strokeColor: "#CC0099",
+	 strokeOpacity: 1.0,
+	 strokeWeight: 3,
+	 geodesic: true,
+	 map: map,
+   });
+   update();
+ }
+ function refitBounds() {
+	//Resize map to fit around selected points  
+	const bounds = new google.maps.LatLngBounds(
+	marker1.getPosition(),
+	marker2.getPosition()
+   );
+    map.fitBounds(bounds);
+ }
+
+ function update() {
+   const path = [marker1.getPosition(), marker2.getPosition()];
+   poly.setPath(path);
+   geodesicPoly.setPath(path);
+   const heading = google.maps.geometry.spherical.computeHeading(path[0], path[1]);
+   const distance = google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]);
+   document.getElementById("origin").textContent = "Origin: " + String(path[0]);
+   document.getElementById("dest").textContent = "Dest.: " + String(path[1]);
+   document.getElementById("bearing").textContent = `Bearing: ${heading.toFixed(4)}°`;
+   document.getElementById("dist").textContent = `Distance: ${(distance/1000).toFixed(3)} km`;
+ }
 </script>
 
 <script>
-    function initMap(){
+	//Acquire position data from the form
+	const forms = document.querySelectorAll('form')
+	const submitInput = forms[0].querySelector('input[type="submit"]')
+	function getData(e){
+		e.preventDefault();
+		const formdata = new FormData(forms[0])
+		document.getElementById("lat1").textContent = formdata.get("Latitude1")
+		document.getElementById("lon1").textContent = formdata.get("Longitude1")
+		document.getElementById("lat2").textContent = formdata.get("Latitude2")
+		document.getElementById("lon2").textContent = formdata.get("Longitude2")
+		const p1 = new google.maps.LatLng(formdata.get("Latitude1"),formdata.get("Longitude1"))
+		const p2 = new google.maps.LatLng(formdata.get("Latitude2"),formdata.get("Longitude2"))
+		marker1.setPosition(p1)
+		marker2.setPosition(p2)
+		marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
+		marker1.icon.anchor=(0,0);
+   		marker1.icon.scaledSize=(5,5);
+		refitBounds()
+	}
+	
+	document.addEventListener('DOMContentLoaded',function(){
+		submitInput.addEventListener('click', getData, false);},false)
+</script>
+
+<script async defer
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8OhoxKqPqPifoJM4bh0ztgUjxt71VGFw&callback=initMap&libraries=geometry">
+</script>
+</body>
+</html>
+<!--
+	Step 1: Submit the form
+	Step 2: Get the Heading, and Declination
+	Step 3: Load the map, with markers
+	Step 4: Display the info
+-->
+<!--  Some stuff i was trying
+	<script>
+    function initMap22(){
 
 		// Map options
 	  	var options = {
@@ -86,9 +204,8 @@ document.addEventListener('DOMContentLoaded',function(){
       // New map
       var map = new google.maps.Map(document.getElementById('map'), options);
 	}
-  </script>
-  
-  <script> async function loadMap() {
+</script>
+<script> async function loadMap22() {
     const payload = {
 		key: 'AIzaSyD8OhoxKqPqPifoJM4bh0ztgUjxt71VGFw',
 		//callback: 'initMap'
@@ -100,12 +217,5 @@ document.addEventListener('DOMContentLoaded',function(){
 	console.log(data)
   // async defer
   }
-  </script>
-</body>
-</html>
-<!--
-	Step 1: Submit the form
-	Step 2: Get the Heading, and Declination
-	Step 3: Load the map, with markers
-	Step 4: Display the info
+</script>
 -->
