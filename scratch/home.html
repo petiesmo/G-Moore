@@ -11,16 +11,27 @@
       height:400px;
       width:100%;
     }
+	*{
+    box-sizing: border-box;
+    margin: 0;
+	}
+	.wrapper{
+    margin: auto;
+    width: 100%;
+    max-width: 800px;
+    padding:10px;
+    background-color: #ccc;
+	}
+	fieldset{
+    float: left;
+    width: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+	}
+	fieldset input{
+    width: 100%;
+	}
 </style>
-<script>
-	
-	function myFunction(that) {
-		//console.log("I have changed the Site to: " + val)
-		console.log(that)
-		console.log(that)
-		console.log(`Lat1: ${Lat1.value}, Long1: ${Long1.value}`)
-		return false;}
-</script>
 </head>	
 
 <body>
@@ -30,7 +41,7 @@
 	<hr>
 <form id="LocationsForm" onsubmit='getData'>	
 <table>
-<tr><td valign="top">
+<div class="wrapper">
 	<fieldset style="width:200px; background-color: bisque;">
 		<!--Future TODO: Add geolocation-->
 		<legend><strong>Location 1</strong></legend>
@@ -39,39 +50,39 @@
 		<label for="Long1">Longitude (E):</label><br>
 		<input type="text" id="Long1" name="Longitude1" value="0"><br><br>
 	</fieldset>
-</td>
-<td valign="top">
 	<fieldset style="width:200px; background-color: cadetblue;">
 		<legend><strong>Location 2</strong></legend>
 		<label for="Site">Choose a Site:</label>
 		<!--TODO: Load this selector from CSV/JSON -->
 		<!--Future TODO: Custom for each user, including saved locations -->
-		<select name="selectSite" id="Site" onchange="myFunction(this)">
+		<select name="selectSite" id="Site" onchange="SiteToForm(this)">
 			<optgroup label="Alaska">
 			<option value="pad1">Pad 1</option>
 			</optgroup>
 			<optgroup label="California">
 			<option value="VAFB1">VAFB1</option>
 			<option value="VAFB2">VAFB2</option>
+			<optgroup label="Cities">
+			<option value="New York">New York</option>
+			<option value="Paris">Paris</option>
 			</optgroup>
 		</select><br><br>
 		<label for="Lat2">Latitude2 (N):</label><br>
-		<input type="text" id="Lat2" name="Latitude2" value="0"><br>
+		<input type="text" id="Lat2" name="Latitude2" value="10"><br>
 		<label for="Long2">Longitude2 (E):</label><br>
-		<input type="text" id="Long2" name="Longitude2" value="0"><br>
+		<input type="text" id="Long2" name="Longitude2" value="20"><br>
 	</fieldset>
-</td>
-<td valign="top">
+
 	<p>
 		Location 1: Latitude: <span id="lat1"></span>°N, Longitude: <span id="lon1"></span>°E<br />
 		Location 2: Latitude: <span id="lat2"></span>°N, Longitude: <span id="lon2"></span>°E<br />
 		<div id="origin"></div>
 		<div id="dest"></div>
 		<div id="bearing"><p>°</p></div>
+		<div id="decline"><p>°</p></div>
 		<div id="dist"></div>
 	</p>
-</td>
-</tr></table>
+</div>
 <input type="submit" value="Submit">
 <input type="reset" value="Reset">
 </form>
@@ -89,6 +100,7 @@
  var pos1 = {lat: 40.714, lng: -74.006};
  var pos2 = {lat: 48.857, lng: 2.352};
  var compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_0.png`
+ //TODO: Change this number!
  var degrees = 76
  
  function initMap() {
@@ -104,13 +116,15 @@
    marker1 = new google.maps.Marker({
 	 map,
 	 draggable: true,
-	 position: pos1
+	 position: pos1,
+	 label: '1'
    });
 
    marker2 = new google.maps.Marker({
 	 map,
 	 draggable: true,
 	 position: pos2,
+	 label: '2'
    });
    refitBounds(map);
 
@@ -141,6 +155,29 @@
    );
     map.fitBounds(bounds);
  }
+ function getDecline(latlng) {
+	{lat1,long1} = latlng	
+	decline = fetch("https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination?browserRequest=true&magneticComponent=d&lat1=15&lat1Hemisphere=N&lon1=25&lon1Hemisphere=W&model=WMM&startYear=2021&startMonth=2&startDay=23&resultFormat=json", {
+  	"headers": {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "accept-language": "en-US,en;q=0.9",
+    "sec-ch-ua": "\"Chromium\";v=\"88\", \"Google Chrome\";v=\"88\", \";Not A Brand\";v=\"99\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "same-origin",
+    "sec-fetch-user": "?1",
+    "upgrade-insecure-requests": "1"
+  	},
+  	"referrer": "https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml",
+  	"referrerPolicy": "strict-origin-when-cross-origin",
+  	"body": null,
+  	"method": "GET",
+  	"mode": "cors",
+  	"credentials": "include"
+	});
+	return decline
+ }
 
  function update() {
    const path = [marker1.getPosition(), marker2.getPosition()];
@@ -148,14 +185,20 @@
    geodesicPoly.setPath(path);
    const heading = google.maps.geometry.spherical.computeHeading(path[0], path[1]);
    const distance = google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]);
+   const decline = getDecline(path[0])	
    document.getElementById("origin").textContent = "Origin: " + String(path[0]);
    document.getElementById("dest").textContent = "Dest.: " + String(path[1]);
    document.getElementById("bearing").textContent = `Bearing: ${heading.toFixed(4)}°`;
+   document.getElementById("decline").textContent = `Declination: ${decline.toFixed(4)}°`;
    document.getElementById("dist").textContent = `Distance: ${(distance/1000).toFixed(3)} km`;
  }
 </script>
 
 <script>
+	//<!--TODO: Changing selector populates form--> 
+	function SiteToFrom(SiteName){
+		console.log(`User picked ${SiteName}`)
+	}
 	//Acquire position data from the form
 	const forms = document.querySelectorAll('form')
 	const submitInput = forms[0].querySelector('input[type="submit"]')
@@ -170,7 +213,7 @@
 		const p2 = new google.maps.LatLng(formdata.get("Latitude2"),formdata.get("Longitude2"))
 		marker1.setPosition(p1)
 		marker2.setPosition(p2)
-		marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
+		//marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
 		marker1.icon.anchor=(0,0);
    		marker1.icon.scaledSize=(5,5);
 		refitBounds()
