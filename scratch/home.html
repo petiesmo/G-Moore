@@ -42,17 +42,7 @@
 <form id="LocationsForm" onsubmit='getData'>	
 <table>
 <div class="wrapper">
-	<fieldset style="width:200px; background-color: bisque;">
-		<!--Future TODO: Add geolocation-->
-		<legend><strong>Location 1</strong></legend>
-		<label for="Lat1">Latitude (N):</label><br>
-		<input type="text" id="Lat1" name="Latitude1" value="0"><br>
-		<label for="Long1">Longitude (E):</label><br>
-		<input type="text" id="Long1" name="Longitude1" value="0"><br><br>
-	</fieldset>
-	<fieldset style="width:200px; background-color: cadetblue;">
-		<legend><strong>Location 2</strong></legend>
-		<label for="Site">Choose a Site:</label>
+	   	<label for="Site">Choose a Site:</label>
 		<!--TODO: Load this selector from CSV/JSON -->
 		<!--Future TODO: Custom for each user, including saved locations -->
 		<select name="selectSite" id="Site" onchange="SiteToForm(this)">
@@ -66,22 +56,33 @@
 			<option value="New York">New York</option>
 			<option value="Paris">Paris</option>
 			</optgroup>
-		</select><br><br>
+		</select>
+    <fieldset style="width:200px; background-color: bisque;">
+		<!--Future TODO: Add geolocation-->
+		<div id='SiteSelector'></div>
+        <legend><strong>Location 1</strong></legend>
+		<label for="Lat1">Latitude (N):</label><br>
+		<input type="text" id="Lat1" name="Latitude1" value="0"><br>
+		<label for="Long1">Longitude (E):</label><br>
+		<input type="text" id="Long1" name="Longitude1" value="0"><br>
+	</fieldset>
+	<fieldset style="width:200px; background-color: cadetblue;">
+		<div id='SiteSelector'></div>
+        <legend><strong>Location 2</strong></legend>
 		<label for="Lat2">Latitude2 (N):</label><br>
 		<input type="text" id="Lat2" name="Latitude2" value="10"><br>
 		<label for="Long2">Longitude2 (E):</label><br>
 		<input type="text" id="Long2" name="Longitude2" value="20"><br>
 	</fieldset>
-
-	<p>
+	<fieldset style="width:350px; background-color: silver;">
 		Location 1: Latitude: <span id="lat1"></span>°N, Longitude: <span id="lon1"></span>°E<br />
 		Location 2: Latitude: <span id="lat2"></span>°N, Longitude: <span id="lon2"></span>°E<br />
 		<div id="origin"></div>
 		<div id="dest"></div>
-		<div id="bearing"></div>
-		<div id="decline"></div>
 		<div id="dist"></div>
-	</p>
+        <div id="bearing"></div>
+		<div id="decline"></div>
+	</fieldset>
 </div>
 <input type="submit" value="Submit">
 <input type="reset" value="Reset">
@@ -89,6 +90,14 @@
 <br>
 
 <div id="map"></div>
+<hr>
+<div id="attribution">
+    <h4>Attributions:</h4>
+    <p>
+    Declination calculated by NOAA (www.ngdc.noaa.gov)<br>
+    Distance and Bearing calculated by Google
+</p>
+</div>
 
 <script>
  //Derived from the Google Maps API templates
@@ -115,21 +124,21 @@
    //Create markers that can be dragged
    marker1 = new google.maps.Marker({
 	 map,
-	 draggable: false,
+	 draggable: true,
 	 position: pos1,
 	 label: '1'
    });
 
    marker2 = new google.maps.Marker({
 	 map,
-	 draggable: false,
+	 draggable: true,
 	 position: pos2,
 	 label: '2'
    });
    refitBounds(map);
 
-   google.maps.event.addListener(marker1, "position_changed", update);
-   google.maps.event.addListener(marker2, "position_changed", update);
+   google.maps.event.addListener(marker1, "mouseup", updateMap);
+   google.maps.event.addListener(marker2, "mouseup", updateMap);
    //"Straight line"
    poly = new google.maps.Polyline({
 	 strokeColor: "#FF0000",
@@ -145,7 +154,7 @@
 	 geodesic: true,
 	 map: map,
    });
-   update();
+   updateMap();
  }
  function refitBounds() {
 	//Resize map to fit around selected points  
@@ -173,11 +182,11 @@
     const magData = await response.json();
     myDecline = magData.result[0].declination
     console.log('Decline is:', myDecline)
-	document.getElementById("decline").textContent = `Declination (Origin): ${myDecline}°`;
+	document.getElementById("decline").textContent = `Declination (at Origin): ${myDecline}°`;
     return myDecline;
  }
  
-function update() {
+function updateMap() {
    const p1 = marker1.position
    const p2 = marker2.position
    const path = [p1,p2];
@@ -217,6 +226,7 @@ function update() {
 		//marker1.icon.anchor=(0,0);
    		//marker1.icon.scaledSize=(5,5);
 		refitBounds()
+        updateMap()
 	}
 	
 	document.addEventListener('DOMContentLoaded',function(){
@@ -228,55 +238,3 @@ function update() {
 </script>
 </body>
 </html>
-<!--
-	Step 1: Submit the form
-	Step 2: Get the Heading, and Declination
-	Step 3: Load the map, with markers
-	Step 4: Display the info
--->
-<!--  Some stuff i was trying
-	<script>
-    function initMap22(){
-
-		// Map options
-	  	var options = {
-        	zoom:8,
-        	center: {lat:42.3601,lng:-71.0589}
-      	}
-
-      // New map
-      var map = new google.maps.Map(document.getElementById('map'), options);
-	}
-</script>
-<script> async function loadMap22() {
-    const payload = {
-		key: 'AIzaSyD8OhoxKqPqPifoJM4bh0ztgUjxt71VGFw',
-		//callback: 'initMap'
-	}
-	const query = new URLSearchParams(payload)
-	const url = "https://maps.googleapis.com/maps/api/js?" + query.toString()
-	const response = await fetch(url)
-	const data = await response.blob
-	console.log(data)
-  // async defer
-  }
-</script>
-"headers": {
-    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "accept-language": "en-US,en;q=0.9",
-    "sec-ch-ua": "\"Chromium\";v=\"88\", \"Google Chrome\";v=\"88\", \";Not A Brand\";v=\"99\"",
-    "sec-ch-ua-mobile": "?0",
-    "sec-fetch-dest": "document",
-    "sec-fetch-mode": "navigate",
-    "sec-fetch-site": "same-origin",
-    "sec-fetch-user": "?1",
-    "upgrade-insecure-requests": "1"
-  	},
-  	"referrer": "https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml",
-  	"referrerPolicy": "strict-origin-when-cross-origin",
-  	"body": null,
-  	"method": "GET",
-  	"mode": "cors",
-  	"credentials": "include"
-	});
--->
