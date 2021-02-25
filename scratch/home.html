@@ -8,7 +8,7 @@
   <title>Moore's Maps</title>
 <style type="text/css">
     #map{
-      height:400px;
+      height:600px;
       width:100%;
     }
 	*{
@@ -97,11 +97,10 @@
  let map
  //Default starting positions
  var mapcenter = {lat: 14, lng: -40};
- var pos1 = {lat: 40.714, lng: -74.006};
- var pos2 = {lat: 48.857, lng: 2.352};
+ var pos1 = {lat: 40.714, lng: -74.006};  //New York
+ var pos2 = {lat: 48.857, lng: 2.352};  //Paris
  var compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_0.png`
- //TODO: Change this number!
- var degrees = 76
+ var degrees = 76  //TODO: Change this number!
  var myDecline = 0
  
  function initMap() {
@@ -116,14 +115,14 @@
    //Create markers that can be dragged
    marker1 = new google.maps.Marker({
 	 map,
-	 draggable: true,
+	 draggable: false,
 	 position: pos1,
 	 label: '1'
    });
 
    marker2 = new google.maps.Marker({
 	 map,
-	 draggable: true,
+	 draggable: false,
 	 position: pos2,
 	 label: '2'
    });
@@ -157,12 +156,13 @@
     map.fitBounds(bounds);
  }
  async function getDecline(posA) {
-    //Build the URL 
+    //Build the URL
+	console.log(posA.lat())
     let calcParams = {
         browserRequest:false,
         magneticComponent:"d",
-        lat1:posA.Lat, lat1Hemisphere:"N",
-        lon1:posA.Lng, lon1Hemisphere:"W",
+        lat1: posA.lat(), lat1Hemisphere:"N",
+        lon1: posA.lng(), lon1Hemisphere:"W",
         model:"WMM",
         resultFormat:"json"}
 	const calcURL = new URL('https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination')
@@ -170,31 +170,33 @@
         calcURL.searchParams.append(key,value)}
     //console.log(calcURL.href)
   	const response = await fetch(calcURL);
-    const data = await response.json();
-    decline = data.result[0].declination
-    console.log('Decline is:', decline)
-    return decline;
+    const magData = await response.json();
+    myDecline = magData.result[0].declination
+    console.log('Decline is:', myDecline)
+	document.getElementById("decline").textContent = `Declination (Origin): ${myDecline}°`;
+    return myDecline;
  }
  
-async function update() {
-   const path = [marker1.getPosition(), marker2.getPosition()];
-   console.log(marker1.getPosition())
+function update() {
+   const p1 = marker1.position
+   const p2 = marker2.position
+   const path = [p1,p2];
+   console.log(`Marker1: ${p1}`)
    poly.setPath(path);
    geodesicPoly.setPath(path);
-   const heading = google.maps.geometry.spherical.computeHeading(path[0], path[1]);
-   const distance = google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]);
-   myDecline = await getDecline(pos1)//.then(decline => const myDecline);	
-   document.getElementById("origin").textContent = "Origin: " + String(path[0]);
-   document.getElementById("dest").textContent = "Dest.: " + String(path[1]);
+   const heading = google.maps.geometry.spherical.computeHeading(p1, p2);
+   const distance = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);	
+   document.getElementById("origin").textContent = `Origin (1): ${p1}`;
+   document.getElementById("dest").textContent = `Dest.(2): ${p2}`;
    document.getElementById("bearing").textContent = `Bearing: ${heading.toFixed(4)}°`;
-   document.getElementById("decline").textContent = `Declination: ${myDecline}°`;
    document.getElementById("dist").textContent = `Distance: ${(distance/1000).toFixed(3)} km`;
+   getDecline(p1);
  }
 </script>
 
 <script>
 	//<!--TODO: Changing selector populates form--> 
-	function SiteToFrom(SiteName){
+	function SiteToForm(SiteName){
 		console.log(`User picked ${SiteName}`)
 	}
 	//Acquire Positions 1,2 data from the form
