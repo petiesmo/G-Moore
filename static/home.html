@@ -71,19 +71,20 @@
 			</optgroup>
 		</select>
 	</fieldset>
-	<fieldset style="width:350px; background-color: silver;">
-		START: Latitude: <span id="lat1"></span>°N, Longitude: <span id="lon1"></span>°E<br />
-		END  : Latitude: <span id="lat2"></span>°N, Longitude: <span id="lon2"></span>°E<br />
-		<div id="origin"></div>
-		<div id="dest"></div>
-		<div id="dist"></div>
-        <div id="bearing"></div>
-		<div id="decline"></div>
-	</fieldset>
 </div>
 <input type="submit" value="Submit">
 <input type="reset" value="Reset">
-</form>
+</form><br>
+	<fieldset style="width:350px; background-color: silver;">
+        <legend><strong>RESULT</strong></legend>
+		<div id="origin"></div>
+		<div id="dest"></div>
+		<div id="dist"></div>
+        <div id="bearing"></div><br><br>
+        This will be deleted <br>(retained so you can double check values):<br>
+		<div id="orighdg"></div>
+        <div id="decline"></div>
+	</fieldset>
 <br>
 
 <div id="map"></div>
@@ -155,7 +156,7 @@
     map.fitBounds(bounds);
  }
  async function getDecline(posA) {
-    //Build the URL
+    //Retrieves a declination value (degrees) at given Lat,Long from API
 	console.log(posA.lat())
     let calcParams = {
         browserRequest:false,
@@ -167,39 +168,37 @@
 	const calcURL = new URL('https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination')
     for(const [key,value] of Object.entries(calcParams)) {
         calcURL.searchParams.append(key,value)}
-    //console.log(calcURL.href)
   	const response = await fetch(calcURL);
     const magData = await response.json();
     myDecline = magData.result[0].declination
     console.log('Decline is:', myDecline)
-	document.getElementById("decline").textContent = `Declination (at Origin): ${myDecline}°`;
     return myDecline;
  }
  
-function updateMap() {
+async function updateMap() {
    const p1 = marker1.position
    const p2 = marker2.position
    const path = [p1,p2];
    console.log(`Marker1: ${p1}, ${p2}`)
    poly.setPath(path);
    //geodesicPoly.setPath(path);
+   const dist_meters = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+   const dist_miles = dist_meters *0.621371192237 / 1000
    const heading = google.maps.geometry.spherical.computeHeading(p1, p2);
-   const distance = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);	
-   document.getElementById("origin").textContent = `START: ${p1}`;
-   document.getElementById("dest").textContent = `END: ${p2}`;
-   document.getElementById("bearing").textContent = `Bearing: ${heading.toFixed(4)}°`;
-   document.getElementById("dist").textContent = `Distance: ${(distance/1000).toFixed(3)} km`;
-   getDecline(p1);
+   const decline = await getDecline(p1)
+   const net_heading = (heading + decline) % 360
+   //Write to screen
+   document.getElementById("origin").textContent = `START: ${p1} °N,°E`;
+   document.getElementById("dest").textContent = `END: ${p2} °N,°E`;
+   document.getElementById("bearing").textContent = `Heading (Azimuth): ${net_heading.toFixed(4)}°`;
+   document.getElementById("dist").textContent = `Distance: ${(dist_miles).toFixed(3)} miles`;
+   
+   document.getElementById("orighdg").textContent = `Heading was (at Origin): ${heading.toFixed(4)}°`;
+   document.getElementById("decline").textContent = `Declination was (at Origin): ${decline.toFixed(4)}°`;
  }
 </script>
 
-<script>
-	//Convert Azimuth to 360
-    function azimuth(az) {
-    
-    return newaz
-    }
-    
+<script>    
     //<!--TODO: Changing selector populates form--> 
 	function SiteToForm(SiteName){
 		console.log(`User picked ${SiteName}`)
