@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
   <title>Moore's Maps</title>
@@ -36,13 +36,26 @@
 
 <body>
 	<h1>Moore's Decline Map</h1>
-	<h4>Provide positions of Origin and Destination to determine</h4>
-	<h4>Distance and Azimuth (plus Declination correction)</h4>
+	<h4>Calculate Distance and Azimuth (with Declination correction)</h4>
+    <h4><i>Enter Start & End coordinates</i></h4> 
+    <h4><i>OR Drag the markers to desired location</i></h4>
 	<hr>
 <form id="LocationsForm" onsubmit='getData'>	
 <table>
 <div class="wrapper">
-	   	<label for="Site">Choose a Site:</label>
+    <fieldset style="width:200px; background-color: bisque;">
+		<!--Future TODO: Add geolocation-->
+		<div id='SiteSelector'></div>
+        <legend><strong>START</strong></legend>
+		<label for="LatLng1">Enter Lat,Long:</label><br>
+		<input type="text" id="LatLng1" name="LatLong1" value="0,0"><br>
+	</fieldset>
+	<fieldset style="width:200px; background-color: cadetblue;">
+		<div id='SiteSelector'></div>
+        <legend><strong>END</strong></legend>
+		<label for="LatLng2">Enter Lat,Long:</label><br>
+		<input type="text" id="LatLng2" name="LatLong2" value="0,0"><br>
+                <label for="Site">Choose a Site:</label>
 		<!--TODO: Load this selector from CSV/JSON -->
 		<!--Future TODO: Custom for each user, including saved locations -->
 		<select name="selectSite" id="Site" onchange="SiteToForm(this)">
@@ -57,26 +70,10 @@
 			<option value="Paris">Paris</option>
 			</optgroup>
 		</select>
-    <fieldset style="width:200px; background-color: bisque;">
-		<!--Future TODO: Add geolocation-->
-		<div id='SiteSelector'></div>
-        <legend><strong>Location 1</strong></legend>
-		<label for="Lat1">Latitude (N):</label><br>
-		<input type="text" id="Lat1" name="Latitude1" value="0"><br>
-		<label for="Long1">Longitude (E):</label><br>
-		<input type="text" id="Long1" name="Longitude1" value="0"><br>
-	</fieldset>
-	<fieldset style="width:200px; background-color: cadetblue;">
-		<div id='SiteSelector'></div>
-        <legend><strong>Location 2</strong></legend>
-		<label for="Lat2">Latitude2 (N):</label><br>
-		<input type="text" id="Lat2" name="Latitude2" value="10"><br>
-		<label for="Long2">Longitude2 (E):</label><br>
-		<input type="text" id="Long2" name="Longitude2" value="20"><br>
 	</fieldset>
 	<fieldset style="width:350px; background-color: silver;">
-		Location 1: Latitude: <span id="lat1"></span>°N, Longitude: <span id="lon1"></span>°E<br />
-		Location 2: Latitude: <span id="lat2"></span>°N, Longitude: <span id="lon2"></span>°E<br />
+		START: Latitude: <span id="lat1"></span>°N, Longitude: <span id="lon1"></span>°E<br />
+		END  : Latitude: <span id="lat2"></span>°N, Longitude: <span id="lon2"></span>°E<br />
 		<div id="origin"></div>
 		<div id="dest"></div>
 		<div id="dist"></div>
@@ -95,7 +92,7 @@
     <h4>Attributions:</h4>
     <p>
     Declination calculated by NOAA (www.ngdc.noaa.gov)<br>
-    Distance and Bearing calculated by Google
+    Distance and Bearing calculated by GoogleMaps
 </p>
 </div>
 
@@ -126,19 +123,19 @@
 	 map,
 	 draggable: true,
 	 position: pos1,
-	 label: '1'
+	 label: 'START'
    });
-
    marker2 = new google.maps.Marker({
 	 map,
 	 draggable: true,
 	 position: pos2,
-	 label: '2'
+	 label: 'END'
    });
    refitBounds(map);
-
+   //Map updates once after marker dropped 
    google.maps.event.addListener(marker1, "mouseup", updateMap);
    google.maps.event.addListener(marker2, "mouseup", updateMap);
+   
    //"Straight line"
    poly = new google.maps.Polyline({
 	 strokeColor: "#FF0000",
@@ -146,14 +143,7 @@
 	 strokeWeight: 3,
 	 map: map,
    });
-   //Spherical arc
-   geodesicPoly = new google.maps.Polyline({
-	 strokeColor: "#CC0099",
-	 strokeOpacity: 1.0,
-	 strokeWeight: 3,
-	 geodesic: true,
-	 map: map,
-   });
+   //Removed Spherical arc
    updateMap();
  }
  function refitBounds() {
@@ -190,13 +180,13 @@ function updateMap() {
    const p1 = marker1.position
    const p2 = marker2.position
    const path = [p1,p2];
-   console.log(`Marker1: ${p1}`)
+   console.log(`Marker1: ${p1}, ${p2}`)
    poly.setPath(path);
-   geodesicPoly.setPath(path);
+   //geodesicPoly.setPath(path);
    const heading = google.maps.geometry.spherical.computeHeading(p1, p2);
    const distance = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);	
-   document.getElementById("origin").textContent = `Origin (1): ${p1}`;
-   document.getElementById("dest").textContent = `Dest.(2): ${p2}`;
+   document.getElementById("origin").textContent = `START: ${p1}`;
+   document.getElementById("dest").textContent = `END: ${p2}`;
    document.getElementById("bearing").textContent = `Bearing: ${heading.toFixed(4)}°`;
    document.getElementById("dist").textContent = `Distance: ${(distance/1000).toFixed(3)} km`;
    getDecline(p1);
@@ -204,7 +194,13 @@ function updateMap() {
 </script>
 
 <script>
-	//<!--TODO: Changing selector populates form--> 
+	//Convert Azimuth to 360
+    function azimuth(az) {
+    
+    return newaz
+    }
+    
+    //<!--TODO: Changing selector populates form--> 
 	function SiteToForm(SiteName){
 		console.log(`User picked ${SiteName}`)
 	}
@@ -214,13 +210,17 @@ function updateMap() {
 	function getData(e){
 		e.preventDefault();
 		const formdata = new FormData(forms[0])
-		document.getElementById("lat1").textContent = formdata.get("Latitude1")
-		document.getElementById("lon1").textContent = formdata.get("Longitude1")
-		document.getElementById("lat2").textContent = formdata.get("Latitude2")
-		document.getElementById("lon2").textContent = formdata.get("Longitude2")
-		const p1 = new google.maps.LatLng(formdata.get("Latitude1"),formdata.get("Longitude1"))
-		const p2 = new google.maps.LatLng(formdata.get("Latitude2"),formdata.get("Longitude2"))
-		marker1.setPosition(p1)
+        const LL1 = formdata.get("LatLong1")
+        const LL2 = formdata.get("LatLong2")
+        console.log(LL1,LL2)
+		document.getElementById("lat1").textContent = LL1
+		//document.getElementById("lon1").textContent = formdata.get("Longitude1")
+		document.getElementById("lat2").textContent = formdata.get("LatLong2")
+		//document.getElementById("lon2").textContent = formdata.get("Longitude2")
+		const p1 = new google.maps.LatLng(formdata.get("LatLong1"))
+		const p2 = new google.maps.LatLng(formdata.get("LatLong2"))
+		console.log(p1, p2)
+        marker1.setPosition(p1)
 		marker2.setPosition(p2)
 		//marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
 		//marker1.icon.anchor=(0,0);
