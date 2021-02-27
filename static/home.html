@@ -74,7 +74,7 @@
 </div>
 <input type="submit" value="Submit">
 <input type="reset" value="Reset">
-</form><br>
+</form><hr>
 	<fieldset style="width:350px; background-color: silver;">
         <legend><strong>RESULT</strong></legend>
 		<div id="origin"></div>
@@ -174,7 +174,11 @@
     console.log('Decline is:', myDecline)
     return myDecline;
  }
- 
+
+function mod(n, m) {
+  return ((n % m) + m) % m;
+} 
+
 async function updateMap() {
    const p1 = marker1.position
    const p2 = marker2.position
@@ -186,7 +190,7 @@ async function updateMap() {
    const dist_miles = dist_meters *0.621371192237 / 1000
    const heading = google.maps.geometry.spherical.computeHeading(p1, p2);
    const decline = await getDecline(p1)
-   const net_heading = (heading + decline) % 360
+   let net_heading = mod((heading + decline),360)
    //Write to screen
    document.getElementById("origin").textContent = `START: ${p1.lat().toFixed(4)}, ${p1.lng().toFixed(4)} °N,°E`;
    document.getElementById("dest").textContent = `END: ${p2.lat().toFixed(4)}, ${p2.lng().toFixed(4)} °N,°E`;
