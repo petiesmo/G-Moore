@@ -81,7 +81,7 @@
 		<div id="dest"></div>
 		<div id="dist"></div>
         <div id="bearing"></div><br><br>
-        This will be deleted <br>(retained so you can double check values):<br>
+        *This will be deleted <br>(retained so you can double check values):<br>
 		<div id="orighdg"></div>
         <div id="decline"></div>
 	</fieldset>
@@ -179,7 +179,7 @@ async function updateMap() {
    const p1 = marker1.position
    const p2 = marker2.position
    const path = [p1,p2];
-   console.log(`Marker1: ${p1}, ${p2}`)
+   //console.log(`Marker1: ${p1}, ${p2}`)
    poly.setPath(path);
    //geodesicPoly.setPath(path);
    const dist_meters = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
@@ -188,8 +188,8 @@ async function updateMap() {
    const decline = await getDecline(p1)
    const net_heading = (heading + decline) % 360
    //Write to screen
-   document.getElementById("origin").textContent = `START: ${p1} °N,°E`;
-   document.getElementById("dest").textContent = `END: ${p2} °N,°E`;
+   document.getElementById("origin").textContent = `START: ${p1.lat().toFixed(4)}, ${p1.lng().toFixed(4)} °N,°E`;
+   document.getElementById("dest").textContent = `END: ${p2.lat().toFixed(4)}, ${p2.lng().toFixed(4)} °N,°E`;
    document.getElementById("bearing").textContent = `Heading (Azimuth): ${net_heading.toFixed(4)}°`;
    document.getElementById("dist").textContent = `Distance: ${(dist_miles).toFixed(3)} miles`;
    
@@ -206,19 +206,17 @@ async function updateMap() {
 	//Acquire Positions 1,2 data from the form
 	const forms = document.querySelectorAll('form')
 	const submitInput = forms[0].querySelector('input[type="submit"]')
+	
 	function getData(e){
 		e.preventDefault();
 		const formdata = new FormData(forms[0])
-        const LL1 = formdata.get("LatLong1")
-        const LL2 = formdata.get("LatLong2")
-        console.log(LL1,LL2)
-		document.getElementById("lat1").textContent = LL1
-		//document.getElementById("lon1").textContent = formdata.get("Longitude1")
-		document.getElementById("lat2").textContent = formdata.get("LatLong2")
-		//document.getElementById("lon2").textContent = formdata.get("Longitude2")
-		const p1 = new google.maps.LatLng(formdata.get("LatLong1"))
-		const p2 = new google.maps.LatLng(formdata.get("LatLong2"))
-		console.log(p1, p2)
+		
+		var LL1 = formdata.get("LatLong1").split(",")		
+		var LL2 = formdata.get("LatLong2").split(",")
+		const p1 = new google.maps.LatLng(LL1[0],LL1[1])
+		const p2 = new google.maps.LatLng(LL2[0],LL2[1])
+        console.log(p1,p2)
+
         marker1.setPosition(p1)
 		marker2.setPosition(p2)
 		//marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
