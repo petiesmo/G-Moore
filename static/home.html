@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
@@ -38,6 +39,7 @@
 
 <body>
 	<h1>Moore's Decline Map</h1>
+
 	<h4>Calculate Distance and Azimuth (with Declination correction)</h4>
     <h4><i>Enter Start & End coordinates</i></h4> 
     <h4><i>OR Drag the markers to desired location</i></h4>
@@ -45,6 +47,7 @@
 <form id="LocationsForm" onsubmit='getData'>	
 <table>
 <div class="wrapper">
+
     <fieldset style="width:200px; background-color: bisque;">
 		<!--Future TODO: Add geolocation-->
 		<div id='SiteSelector'></div>
@@ -58,6 +61,7 @@
 		<label for="LatLng2">Enter Lat,Long:</label><br>
 		<input type="text" id="LatLng2" name="LatLong2" value="0,0"><br>
                 <label for="Site">Choose a Site:</label>
+
 		<!--TODO: Load this selector from CSV/JSON -->
 		<!--Future TODO: Custom for each user, including saved locations -->
 		<select name="selectSite" id="Site" onchange="SiteToForm(this)">
@@ -72,6 +76,7 @@
 			<option value="Paris">Paris</option>
 			</optgroup>
 		</select>
+
 	</fieldset>
 </div>
 <input type="submit" value="Submit">
@@ -95,7 +100,9 @@
     <h4>Attributions:</h4>
     <p>
     Declination calculated by NOAA (www.ngdc.noaa.gov)<br>
+
     Distance and Bearing calculated by GoogleMaps
+
 </p>
 </div>
 
@@ -126,12 +133,15 @@
 	 map,
 	 draggable: true,
 	 position: pos1,
+
 	 label: 'START'
    });
+
    marker2 = new google.maps.Marker({
 	 map,
 	 draggable: true,
 	 position: pos2,
+
 	 label: 'END'
    });
    refitBounds(map);
@@ -139,6 +149,7 @@
    google.maps.event.addListener(marker1, "mouseup", updateMap);
    google.maps.event.addListener(marker2, "mouseup", updateMap);
    
+
    //"Straight line"
    poly = new google.maps.Polyline({
 	 strokeColor: "#FF0000",
@@ -146,7 +157,9 @@
 	 strokeWeight: 3,
 	 map: map,
    });
+
    //Removed Spherical arc
+
    updateMap();
  }
  function refitBounds() {
@@ -158,7 +171,9 @@
     map.fitBounds(bounds);
  }
  async function getDecline(posA) {
+
     //Retrieves a declination value (degrees) at given Lat,Long from API
+
 	console.log(posA.lat())
     let calcParams = {
         browserRequest:false,
@@ -170,10 +185,13 @@
 	const calcURL = new URL('https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination')
     for(const [key,value] of Object.entries(calcParams)) {
         calcURL.searchParams.append(key,value)}
+
+
   	const response = await fetch(calcURL);
     const magData = await response.json();
     myDecline = magData.result[0].declination
     console.log('Decline is:', myDecline)
+
     return myDecline;
  }
 
@@ -206,12 +224,14 @@ async function updateMap() {
 
 <script>    
     //<!--TODO: Changing selector populates form--> 
+
 	function SiteToForm(SiteName){
 		console.log(`User picked ${SiteName}`)
 	}
 	//Acquire Positions 1,2 data from the form
 	const forms = document.querySelectorAll('form')
 	const submitInput = forms[0].querySelector('input[type="submit"]')
+
 	
 	function getData(e){
 		e.preventDefault();
@@ -224,6 +244,7 @@ async function updateMap() {
         console.log(p1,p2)
 
         marker1.setPosition(p1)
+
 		marker2.setPosition(p2)
 		//marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
 		//marker1.icon.anchor=(0,0);
