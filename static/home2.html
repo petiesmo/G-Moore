@@ -2,69 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-  <!-- CSS only -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
   <title>Moore's Maps</title>
 <style type="text/css">
     #map{
       height:600px;
-      width:100%;
-    }
-	*{
-    box-sizing: border-box;
-    margin: 0;
+      width:90%;
+      box-sizing: content-box;
+      margin: auto;
 	}
-	.wrapper{
-    margin: auto;
-    width: 100%;
-    max-width: 800px;
-    padding:10px;
-    background-color: #ccc;
-	}
-	fieldset{
-    float: left;
+    .advertisement
+    height: 100px;
     width: 50%;
-    display: inline-block;
-    box-sizing: border-box;
-	}
-	fieldset input{
-    width: 100%;
-	}
+    margin: auto;
+    }
 </style>
 </head>	
 
 <body>
-	<h1>Moore's Decline Map</h1>
-
-	<h4>Calculate Distance and Azimuth (with Declination correction)</h4>
-    <h4><i>Enter Start & End coordinates</i></h4> 
-    <h4><i>OR Drag the markers to desired location</i></h4>
+    <div class="advertisement" align="center">Ad Goes Here</div>
 	<hr>
+    <div class="preamble" align="center">
+    <h1>Moore's Decline Map</h1>
+	<h4>Calculates Distance and Azimuth (with Declination correction)</h4>
+    <h5><i>Enter Start & End coordinates OR</i></h5> 
+    <h5><i>Drag the markers to desired location</i></h5>
+	<hr></div>
 <form id="LocationsForm" onsubmit='getData'>	
 <table>
-<div class="wrapper">
-
-    <fieldset style="width:200px; background-color: bisque;">
+<div class="container">
+    <div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-3">
+        <fieldset style = "background-color: bisque;">
 		<!--Future TODO: Add geolocation-->
 		<div id='SiteSelector'></div>
         <legend><strong>START</strong></legend>
 		<label for="LatLng1">Enter Lat,Long:</label><br>
 		<input type="text" id="LatLng1" name="LatLong1" value="0,0"><br>
-	</fieldset>
-	<fieldset style="width:200px; background-color: cadetblue;">
-		<div id='SiteSelector'></div>
-        <legend><strong>END</strong></legend>
-		<label for="LatLng2">Enter Lat,Long:</label><br>
-		<input type="text" id="LatLng2" name="LatLong2" value="0,0"><br>
-                <label for="Site">Choose a Site:</label>
-
-		<!--TODO: Load this selector from CSV/JSON -->
-		<!--Future TODO: Custom for each user, including saved locations -->
-		<select name="selectSite" id="Site" onchange="SiteToForm(this)">
+        </fieldset>
+	</div>
+    <div class="col-md-3">
+        <fieldset style="background-color: cadetblue;">
+            <div id='SiteSelector'></div>
+            <legend><strong>END</strong></legend>
+            <label for="LatLng2">Enter Lat,Long:</label><br>
+            <input type="text" id="LatLng2" name="LatLong2" value="0,0"><br>
+        </fieldset>
+        <label for="Site">Choose a Site:</label>
+    <!--TODO: Load this selector from CSV/JSON -->
+	<!--Future TODO: Custom for each user, including saved locations -->
+        <select class="form-select" name="selectSite" id="Site" onchange="SiteToForm(this)">
 			<optgroup label="Alaska">
 			<option value="pad1">Pad 1</option>
 			</optgroup>
@@ -76,22 +68,33 @@
 			<option value="Paris">Paris</option>
 			</optgroup>
 		</select>
-
-	</fieldset>
-</div>
-<input type="submit" value="Submit">
-<input type="reset" value="Reset">
-</form><hr>
-	<fieldset style="width:350px; background-color: silver;">
+    </div>
+    <div class = "col-md-4">
+        <fieldset style="background-color: silver;">
         <legend><strong>RESULT</strong></legend>
 		<div id="origin"></div>
 		<div id="dest"></div>
 		<div id="dist"></div>
-        <div id="bearing"></div><br><br>
-        *This will be deleted <br>(retained so you can double check values):<br>
+        <div id="bearing"></div>
+        <!--*This will be deleted <br>(retained so you can double check values):<br>
 		<div id="orighdg"></div>
-        <div id="decline"></div>
-	</fieldset>
+        <div id="decline"></div>-->
+        </fieldset>
+    </div>
+    <div class="col-md-1"></div>
+    </div>
+    <div class="row">
+        <div class=col-md-1></div>
+        <div class=col-md-3>
+        <input type="submit" value="Submit">
+        <input type="reset" value="Reset">
+        <div>
+        <div class=col-md-6></div>
+    </div>
+</div>
+</form><hr>
+
+ 
 <br>
 
 <div id="map"></div>
@@ -100,9 +103,7 @@
     <h4>Attributions:</h4>
     <p>
     Declination calculated by NOAA (www.ngdc.noaa.gov)<br>
-
     Distance and Bearing calculated by GoogleMaps
-
 </p>
 </div>
 
@@ -133,15 +134,12 @@
 	 map,
 	 draggable: true,
 	 position: pos1,
-
 	 label: 'START'
    });
-
    marker2 = new google.maps.Marker({
 	 map,
 	 draggable: true,
 	 position: pos2,
-
 	 label: 'END'
    });
    refitBounds(map);
@@ -149,7 +147,6 @@
    google.maps.event.addListener(marker1, "mouseup", updateMap);
    google.maps.event.addListener(marker2, "mouseup", updateMap);
    
-
    //"Straight line"
    poly = new google.maps.Polyline({
 	 strokeColor: "#FF0000",
@@ -157,9 +154,7 @@
 	 strokeWeight: 3,
 	 map: map,
    });
-
    //Removed Spherical arc
-
    updateMap();
  }
  function refitBounds() {
@@ -171,9 +166,7 @@
     map.fitBounds(bounds);
  }
  async function getDecline(posA) {
-
     //Retrieves a declination value (degrees) at given Lat,Long from API
-
 	console.log(posA.lat())
     let calcParams = {
         browserRequest:false,
@@ -185,13 +178,10 @@
 	const calcURL = new URL('https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination')
     for(const [key,value] of Object.entries(calcParams)) {
         calcURL.searchParams.append(key,value)}
-
-
   	const response = await fetch(calcURL);
     const magData = await response.json();
     myDecline = magData.result[0].declination
     console.log('Decline is:', myDecline)
-
     return myDecline;
  }
 
@@ -224,14 +214,12 @@ async function updateMap() {
 
 <script>    
     //<!--TODO: Changing selector populates form--> 
-
 	function SiteToForm(SiteName){
 		console.log(`User picked ${SiteName}`)
 	}
 	//Acquire Positions 1,2 data from the form
 	const forms = document.querySelectorAll('form')
 	const submitInput = forms[0].querySelector('input[type="submit"]')
-
 	
 	function getData(e){
 		e.preventDefault();
@@ -244,7 +232,6 @@ async function updateMap() {
         console.log(p1,p2)
 
         marker1.setPosition(p1)
-
 		marker2.setPosition(p2)
 		//marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
 		//marker1.icon.anchor=(0,0);
