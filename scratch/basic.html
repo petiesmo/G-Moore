@@ -1,0 +1,17 @@
+<html>
+<body>
+Data goes below
+<div id="data1"></div>
+<script>
+async function getSites(){
+  let response = await fetch('./sites.csv');
+  let data = await response.text();
+  //catch(error => console.error(error));
+  console.log(data)
+  document.getElementById("data1").innerText = data;
+  return false
+}
+getSites()
+</script>
+</body>
+</html>
