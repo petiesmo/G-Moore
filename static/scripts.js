@@ -9,7 +9,7 @@ function csvToJsonArray(csv) {
   var lines = csv.split("\n");
   var result = [];
   var headers = lines[0].trim().split(",");
-
+  /* Step through each line/row */
   for(var i=1 in lines) {
     var obj = {};
     var row = lines[i],
@@ -56,10 +56,10 @@ async function getSites(fileURL){
 }
 
 //Populate the dropdown selector from a helper CSV file
-const fileSites = new File('sites.csv')
-const sitesURL = URL.createObjectURL(fileSites)
+//const fileSites = new File('sites.csv')
+//const sitesURL = URL.createObjectURL(fileSites)
 //Now fetch that file
-getSites(sitesURL)
+getSites('./sites.csv')
   .then(Sites => JSON.parse(Sites))
   .then(aSites => makeSelectFromJson(aSites,"ChooseSites"))
   .catch(error => console.error(error));
@@ -76,11 +76,12 @@ function makeSelectFromJson(jsonArray, selectId){
     dropdown.appendChild(opt);
   });
   var divContainer = document.getElementById("SiteSelector2");
-  //divContainer.innerHTML = "";
+  divContainer.innerHTML = "";
   divContainer.appendChild(dropdown);
-  dropdown.onchange = SiteToForm(this);
+  dropdown.onchange = displayValue();
 }
 
+
 function displayValue(){
-  document.getElementById("LatLng2").innerText = document.getElementById("ChooseSites").value;
+  document.getElementById("LatLng2").value = document.getElementById("SiteSelector2").value;
 }
