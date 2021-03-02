@@ -10,8 +10,8 @@
   <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
-  <script src="./scripts.js></script>
-  <title>Moore's Maps</title>
+  <script src="./scripts.js"></script>
+<title>Moore's Maps</title>
 <style type="text/css">
     #map{
       height:600px;
@@ -34,7 +34,8 @@
 	<h4>Calculates Distance and Azimuth (with Declination correction)</h4>
     <h5><i>Enter Start & End coordinates OR</i></h5> 
     <h5><i>Drag the markers to desired location</i></h5>
-	<hr></div>
+	<hr>
+    </div>
 <form id="LocationsForm" onsubmit='getData'>	
 <table>
 <div class="container">
@@ -48,7 +49,7 @@
 		<input type="text" id="LatLng1" name="LatLong1" value="0,0"><br>
         </fieldset>
         <label for="SiteSelector">Choose a Site:</label>
-        <div id='SiteSelector'></div>
+        <div id='SiteSelector1'></div>
 	</div>
     <div class="col-md-3">
         <fieldset style="background-color: cadetblue;">
@@ -58,9 +59,7 @@
         </fieldset>
         <label for="SiteSelector">Choose a Site:</label>
         <!--Future TODO: Custom for each user, including saved locations -->
-        <div id='SiteSelector'></div>
-        <select class="form-select" name="selectSite" id="Site" onchange="SiteToForm(this)">
-
+        <div id='SiteSelector2'></div>
     </div>
     <div class = "col-md-4">
         <fieldset style="background-color: silver;">
@@ -75,12 +74,12 @@
     <div class="col-md-1"></div>
     </div>
     <div class="row">
-        <div class=col-md-1></div>
-        <div class=col-md-3>
+        <div class="col-md-1"></div>
+        <div class="col-md-3">
         <input type="submit" value="Submit">
         <input type="reset" value="Reset">
         <div>
-        <div class=col-md-6></div>
+        <div class="col-md-6"></div>
     </div>
 </div>
 </form><hr>
@@ -102,20 +101,17 @@
  let map
  //Default starting positions
  var mapcenter = {lat: 45, lng: -100};  //Arbitrary
- var pos1 = {lat: 40.714, lng: -74.006};  //One WTC, New York
- var pos2 = {lat: 47.6205, lng: -122.3493};  //Space Needle, Seattle
+ var pos2 = {lat: 40.714, lng: -74.006};  //One WTC, New York
+ var pos1 = {lat: 47.6205, lng: -122.3493};  //Space Needle, Seattle
  var compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_0.png`
  var degrees = 76  //TODO: Change this number!
  var myDecline = 0
  
  function initMap() {
    map = new google.maps.Map(document.getElementById("map"), {
-	 zoom: 2,
-	 center: mapcenter,
+	 zoom: 10,
+	 center: mapcenter
    });
-   map.controls[google.maps.ControlPosition.TOP_CENTER].push(
-	 document.getElementById("info")
-   );
     
    //Create markers that can be dragged
    marker1 = new google.maps.Marker({
@@ -142,15 +138,15 @@
 	 strokeWeight: 3,
 	 map: map,
    });
-   //Removed Spherical arc
+   //Removed Spherical arc graphic
    updateMap();
  }
  
  function refitBounds() {
 	//Resize map to fit around selected points  
 	const bounds = new google.maps.LatLngBounds(
-	marker1.getPosition(),
-	marker2.getPosition()
+	marker1.position,
+	marker2.position
    );
     map.fitBounds(bounds);
  }
@@ -175,10 +171,6 @@
     return myDecline;
  }
 
-function modulo(n, m) {
-  return ((n % m) + m) % m;
-} 
-
 async function updateMap() {
    const p1 = marker1.position
    const p2 = marker2.position
@@ -202,35 +194,31 @@ async function updateMap() {
 </script>
 
 <script>    
-    //Populate the dropdown selector from a helper CSV file
-    const fileSites = new File('./sites.csv')
-    const fileURL = URL.createObjectURL(fileSites)
-    //Now fetch
-    //Changing Site selector populates form
-	function SiteToForm(SiteName){
-		console.log(`User picked ${SiteName}`)
-        document.getElementById('LatLng1').value = Site1.LatLng
-        document.getElementById('LatLng2').value = Site2.LatLng
-        }
-	//Acquire Positions 1,2 data from the form
-	const forms = document.querySelectorAll('form')
-	const submitInput = forms[0].querySelector('input[type="submit"]')
-	
-    function getData(e){
-		e.preventDefault();
-		const formdata = new FormData(forms[0])
-		var LL1 = formdata.get("LatLong1").split(",")		
-		var LL2 = formdata.get("LatLong2").split(",")
-		const p1 = new google.maps.LatLng(LL1[0],LL1[1])
-		const p2 = new google.maps.LatLng(LL2[0],LL2[1])
-        marker1.setPosition(p1)
-		marker2.setPosition(p2)
-		//marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
-		//marker1.icon.anchor=(0,0);
-   		//marker1.icon.scaledSize=(5,5);
-		refitBounds()
-        updateMap()
-	}
+//Changing Site selector populates the Form
+function SiteToForm(SiteName){
+    console.log(`User picked ${SiteName}`)
+    document.getElementById('LatLng1').value = Site1.LatLng
+    document.getElementById('LatLng2').value = Site2.LatLng
+    }
+//Acquire Positions 1,2 data from the form
+const forms = document.querySelectorAll('form')
+const submitInput = forms[0].querySelector('input[type="submit"]')
+
+function getData(e){
+    e.preventDefault();
+    const formdata = new FormData(forms[0])
+    var LL1 = formdata.get("LatLong1").split(",")		
+    var LL2 = formdata.get("LatLong2").split(",")
+    const p1 = new google.maps.LatLng(LL1[0],LL1[1])
+    const p2 = new google.maps.LatLng(LL2[0],LL2[1])
+    marker1.setPosition(p1)
+    marker2.setPosition(p2)
+    //marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
+    //marker1.icon.anchor=(0,0);
+    //marker1.icon.scaledSize=(5,5);
+    updateMap()
+    refitBounds()
+}
     
 	document.addEventListener('DOMContentLoaded',function(){
         submitInput.addEventListener('click', getData, false);},false)
