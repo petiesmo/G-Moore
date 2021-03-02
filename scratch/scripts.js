@@ -44,7 +44,8 @@ function csvToJson(csv) {
   }
   return JSON.stringify(result);
 }
-
+//Retrieves the location info stored in sites.csv
+/*Future: Could generalize, if other files are needed (e.g., user customer sites)*/
 async function getSites(){
   let response = await fetch('./sites.csv');
   let data = await response.text();
@@ -52,45 +53,14 @@ async function getSites(){
   console.log(jdata)
   return jdata
 }
+
 getSites()
   .then(Sites => JSON.parse(Sites))
   //.then(aSites => jsonToTable(aSites,"data1"))
   .then(aSites => makeSelectFromJson(aSites,"ChooseSites"))
   .catch(error => console.error(error));
 
-function jsonToTable(jsonArray, divtag="data")   {
-    // EXTRACT VALUE FOR HTML HEADER. 
-    var col = [];
-    for (var i = 0 in jsonArray) {
-        for (var key in jsonArray[i]) {
-            if (col.indexOf(key) === -1) {
-                col.push(key);
-            }
-        }
-    }
-    // CREATE DYNAMIC TABLE.
-    var table = document.createElement("table");
-    // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
-    var tr = table.insertRow(-1);                   // TABLE ROW.
-    for (var i = 0 in col) {
-        var th = document.createElement("th");      // TABLE HEADER.
-        th.innerHTML = col[i];
-        tr.appendChild(th);
-    }
-    // ADD JSON DATA TO THE TABLE AS ROWS.
-    for (var i = 0 in jsonArray) {
-        tr = table.insertRow(-1);
-        for (var j in col) {
-            var tabCell = tr.insertCell(-1);
-            tabCell.innerHTML = jsonArray[i][col[j]];
-        }
-    }
-    // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
-    var divContainer = document.getElementById(divtag);
-    divContainer.innerHTML = "";
-    divContainer.appendChild(table);
-  }
-
+//Populate the SELECT dropdown from a JSON array
 function makeSelectFromJson(jsonArray, selectId){
   var dropdown = document.createElement("select");
   dropdown.id = selectId
