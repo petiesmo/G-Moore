@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="description" content="Find Bearing with Declination">
+  <meta name="keywords" content="HTML, CSS, JavaScript">
+  <meta name="author" content="petiesmo">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+  <script src="./scripts.js></script>
   <title>Moore's Maps</title>
 <style type="text/css">
     #map{
@@ -22,7 +26,6 @@
     }
 </style>
 </head>	
-
 <body>
     <div class="advertisement" align="center">Ad Goes Here</div>
 	<hr>
@@ -39,35 +42,25 @@
     <div class="col-md-1"></div>
     <div class="col-md-3">
         <fieldset style = "background-color: bisque;">
-		<!--Future TODO: Add geolocation-->
-		<div id='SiteSelector'></div>
+		<!--Future TODO: Add geolocation?-->
         <legend><strong>START</strong></legend>
 		<label for="LatLng1">Enter Lat,Long:</label><br>
 		<input type="text" id="LatLng1" name="LatLong1" value="0,0"><br>
         </fieldset>
+        <label for="SiteSelector">Choose a Site:</label>
+        <div id='SiteSelector'></div>
 	</div>
     <div class="col-md-3">
         <fieldset style="background-color: cadetblue;">
-            <div id='SiteSelector'></div>
             <legend><strong>END</strong></legend>
             <label for="LatLng2">Enter Lat,Long:</label><br>
             <input type="text" id="LatLng2" name="LatLong2" value="0,0"><br>
         </fieldset>
-        <label for="Site">Choose a Site:</label>
-    <!--TODO: Load this selector from CSV/JSON -->
-	<!--Future TODO: Custom for each user, including saved locations -->
+        <label for="SiteSelector">Choose a Site:</label>
+        <!--Future TODO: Custom for each user, including saved locations -->
+        <div id='SiteSelector'></div>
         <select class="form-select" name="selectSite" id="Site" onchange="SiteToForm(this)">
-			<optgroup label="Alaska">
-			<option value="pad1">Pad 1</option>
-			</optgroup>
-			<optgroup label="California">
-			<option value="VAFB1">VAFB1</option>
-			<option value="VAFB2">VAFB2</option>
-			<optgroup label="Cities">
-			<option value="New York">New York</option>
-			<option value="Paris">Paris</option>
-			</optgroup>
-		</select>
+
     </div>
     <div class = "col-md-4">
         <fieldset style="background-color: silver;">
@@ -76,9 +69,7 @@
 		<div id="dest"></div>
 		<div id="dist"></div>
         <div id="bearing"></div>
-        <!--*This will be deleted <br>(retained so you can double check values):<br>
-		<div id="orighdg"></div>
-        <div id="decline"></div>-->
+        *Includes declination correction
         </fieldset>
     </div>
     <div class="col-md-1"></div>
@@ -93,10 +84,7 @@
     </div>
 </div>
 </form><hr>
-
- 
 <br>
-
 <div id="map"></div>
 <hr>
 <div id="attribution">
@@ -113,9 +101,9 @@
  let poly, geodesicPoly;
  let map
  //Default starting positions
- var mapcenter = {lat: 14, lng: -40};
- var pos1 = {lat: 40.714, lng: -74.006};  //New York
- var pos2 = {lat: 48.857, lng: 2.352};  //Paris
+ var mapcenter = {lat: 45, lng: -100};  //Arbitrary
+ var pos1 = {lat: 40.714, lng: -74.006};  //One WTC, New York
+ var pos2 = {lat: 47.6205, lng: -122.3493};  //Space Needle, Seattle
  var compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_0.png`
  var degrees = 76  //TODO: Change this number!
  var myDecline = 0
@@ -157,6 +145,7 @@
    //Removed Spherical arc
    updateMap();
  }
+ 
  function refitBounds() {
 	//Resize map to fit around selected points  
 	const bounds = new google.maps.LatLngBounds(
@@ -165,6 +154,7 @@
    );
     map.fitBounds(bounds);
  }
+ 
  async function getDecline(posA) {
     //Retrieves a declination value (degrees) at given Lat,Long from API
 	console.log(posA.lat())
@@ -185,7 +175,7 @@
     return myDecline;
  }
 
-function mod(n, m) {
+function modulo(n, m) {
   return ((n % m) + m) % m;
 } 
 
@@ -200,37 +190,39 @@ async function updateMap() {
    const dist_miles = dist_meters *0.621371192237 / 1000
    const heading = google.maps.geometry.spherical.computeHeading(p1, p2);
    const decline = await getDecline(p1)
-   let net_heading = mod((heading + decline),360)
-   //Write to screen
+   let net_heading = modulo((heading + decline),360)
+   //Write to DOM
    document.getElementById("origin").textContent = `START: ${p1.lat().toFixed(4)}, ${p1.lng().toFixed(4)} °N,°E`;
    document.getElementById("dest").textContent = `END: ${p2.lat().toFixed(4)}, ${p2.lng().toFixed(4)} °N,°E`;
-   document.getElementById("bearing").textContent = `Heading (Azimuth): ${net_heading.toFixed(4)}°`;
+   document.getElementById("bearing").textContent = `Heading (Azimuth*): ${net_heading.toFixed(4)}°`;
    document.getElementById("dist").textContent = `Distance: ${(dist_miles).toFixed(3)} miles`;
-   
-   document.getElementById("orighdg").textContent = `Heading was (at Origin): ${heading.toFixed(4)}°`;
-   document.getElementById("decline").textContent = `Declination was (at Origin): ${decline.toFixed(4)}°`;
+   //document.getElementById("orighdg").textContent = `Heading was (at Origin): ${heading.toFixed(4)}°`;
+   //document.getElementById("decline").textContent = `Declination was (at Origin): ${decline.toFixed(4)}°`;
  }
 </script>
 
 <script>    
-    //<!--TODO: Changing selector populates form--> 
+    //Populate the dropdown selector from a helper CSV file
+    const fileSites = new File('./sites.csv')
+    const fileURL = URL.createObjectURL(fileSites)
+    //Now fetch
+    //Changing Site selector populates form
 	function SiteToForm(SiteName){
 		console.log(`User picked ${SiteName}`)
-	}
+        document.getElementById('LatLng1').value = Site1.LatLng
+        document.getElementById('LatLng2').value = Site2.LatLng
+        }
 	//Acquire Positions 1,2 data from the form
 	const forms = document.querySelectorAll('form')
 	const submitInput = forms[0].querySelector('input[type="submit"]')
 	
-	function getData(e){
+    function getData(e){
 		e.preventDefault();
 		const formdata = new FormData(forms[0])
-		
 		var LL1 = formdata.get("LatLong1").split(",")		
 		var LL2 = formdata.get("LatLong2").split(",")
 		const p1 = new google.maps.LatLng(LL1[0],LL1[1])
 		const p2 = new google.maps.LatLng(LL2[0],LL2[1])
-        console.log(p1,p2)
-
         marker1.setPosition(p1)
 		marker2.setPosition(p2)
 		//marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
@@ -239,9 +231,9 @@ async function updateMap() {
 		refitBounds()
         updateMap()
 	}
-	
+    
 	document.addEventListener('DOMContentLoaded',function(){
-		submitInput.addEventListener('click', getData, false);},false)
+        submitInput.addEventListener('click', getData, false);},false)
 </script>
 
 <script async defer
