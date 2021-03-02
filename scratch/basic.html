@@ -1,17 +1,10 @@
 <html>
 <body>
-Data goes below
+Updating Data goes below
+<div id="Select1">Dropdown goes here</div>
+<div id="chosen"></div>
 <div id="data1"></div>
-<script>
-async function getSites(){
-  let response = await fetch('./sites.csv');
-  let data = await response.text();
-  //catch(error => console.error(error));
-  console.log(data)
-  document.getElementById("data1").innerText = data;
-  return false
-}
-getSites()
-</script>
+<script src='./scripts.js'></script>
+
 </body>
 </html>
