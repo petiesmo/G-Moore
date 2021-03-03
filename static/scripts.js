@@ -47,17 +47,16 @@ function csvToJsonArray(csv) {
 }
 //Retrieves the location info stored in sites.csv and returns as a JSON array
 /*Future: Could generalize, if other files are needed (e.g., user customer sites)*/
-async function getSites(sitesURL){
-  let response = await fetch(sitesURL);
+async function getSites(){
+  let response = await fetch('https://github.com/petiesmo/G-Moore/blob/hosted/static/sites.csv');
   let data = await response.text();
   let jdata = csvToJsonArray(data);
   return jdata
 }
 
 //Populate the dropdown selector from a helper CSV file
-const proxyurl = "https://cors-anywhere.herokuapp.com/"
-const csvURL = new URL('https://github.com/petiesmo/G-Moore/blob/hosted/static/sites.csv')
-getSites(proxyurl+csvURL)
+//const csvURL = new URL('https://github.com/petiesmo/G-Moore/blob/hosted/static/sites.csv')
+getSites()
   .then(Sites => JSON.parse(Sites))
   .then(aSites => makeSelectFromJson(aSites,"ChooseSites"))
   .catch(error => console.error(error));
