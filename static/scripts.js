@@ -48,7 +48,7 @@ function csvToJsonArray(csv) {
 //Retrieves the location info stored in sites.csv and returns as a JSON array
 /*Future: Could generalize, if other files are needed (e.g., user customer sites)*/
 async function getSites(sitesURL){
-  let response = await fetch(sitesURL);
+  let response = await fetch(sitesURL, {mode: 'no-cors'});
   let data = await response.text();
   let jdata = csvToJsonArray(data);
   return jdata
