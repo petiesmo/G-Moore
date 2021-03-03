@@ -1,6 +1,7 @@
 //scripts.js
-//Modulo (remainder) division, accommodating negative numbers
+
 function modulo(n, m) {
+  //Modulo (remainder) division, accommodating negative numbers
   return ((n % m) + m) % m;
 } 
 
@@ -24,7 +25,6 @@ function csvToJsonArray(csv) {
       if (c === '"') {
         do { c = row[++idx]; } while (c !== '"' && idx < row.length - 1);
       }
-
       if (c === ',' || /* handle end of line with no comma */ idx === row.length - 1) {
         /* Capture value */
         var value = row.substr(startValueIdx, idx - startValueIdx).trim();
@@ -47,41 +47,32 @@ function csvToJsonArray(csv) {
 }
 //Retrieves the location info stored in sites.csv and returns as a JSON array
 /*Future: Could generalize, if other files are needed (e.g., user customer sites)*/
-async function getSites(fileURL){
-  let response = await fetch(fileURL);
+async function getSites(){
+  let response = await fetch('./sites.csv', {mode:'no-cors'});
   let data = await response.text();
   let jdata = csvToJsonArray(data);
-  console.log(jdata)
   return jdata
 }
 
 //Populate the dropdown selector from a helper CSV file
-//const fileSites = new File('sites.csv')
-//const sitesURL = URL.createObjectURL(fileSites)
-//Now fetch that file
-getSites('./sites.csv')
+getSites()
   .then(Sites => JSON.parse(Sites))
   .then(aSites => makeSelectFromJson(aSites,"ChooseSites"))
   .catch(error => console.error(error));
 
 //Populate the SELECT dropdown from a JSON array
 function makeSelectFromJson(jsonArray, selectId){
-  var dropdown = document.createElement("select");
+  const dropdown = document.createElement("select");
   dropdown.id = selectId
+  dropdown.onchange = SiteToForm;
   jsonArray.forEach(elem => {
-    console.log(elem)
     var opt = document.createElement("option");
-    opt.textContent = elem.Site + " - " + elem.Pad;
+    opt.textContent = elem.Tag;
     opt.value = JSON.stringify({lat: elem.Latitude, lng: elem.Longitude})
     dropdown.appendChild(opt);
   });
   var divContainer = document.getElementById("SiteSelector2");
   divContainer.innerHTML = "";
   divContainer.appendChild(dropdown);
-  dropdown.onchange = displayValue();
 }
 
-
-function displayValue(){
-  document.getElementById("LatLng2").value = document.getElementById("SiteSelector2").value;
-}

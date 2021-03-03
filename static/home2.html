@@ -70,6 +70,7 @@
         <div id="bearing"></div>
         *Includes declination correction
         </fieldset>
+        <!-- Future TODO: Button & function to save/export/email-->
     </div>
     <div class="col-md-1"></div>
     </div>
@@ -194,12 +195,6 @@ async function updateMap() {
 </script>
 
 <script>    
-//Changing Site selector populates the Form
-function SiteToForm(SiteName){
-    console.log(`User picked ${SiteName}`)
-    document.getElementById('LatLng1').value = Site1.LatLng
-    document.getElementById('LatLng2').value = Site2.LatLng
-    }
 //Acquire Positions 1,2 data from the form
 const forms = document.querySelectorAll('form')
 const submitInput = forms[0].querySelector('input[type="submit"]')
@@ -207,6 +202,7 @@ const submitInput = forms[0].querySelector('input[type="submit"]')
 function getData(e){
     e.preventDefault();
     const formdata = new FormData(forms[0])
+    /*Future TODO: input validation for LL1, LL2*/
     var LL1 = formdata.get("LatLong1").split(",")		
     var LL2 = formdata.get("LatLong2").split(",")
     const p1 = new google.maps.LatLng(LL1[0],LL1[1])
@@ -219,9 +215,17 @@ function getData(e){
     updateMap()
     refitBounds()
 }
-    
-	document.addEventListener('DOMContentLoaded',function(){
-        submitInput.addEventListener('click', getData, false);},false)
+//Changing Site selector populates the Form
+function SiteToForm(){
+    const ss2 = document.getElementById('ChooseSites').value
+    const ssLL = new google.maps.LatLng(ss2)
+    console.log(ss2.replace("{","").replace("}","").split(","))
+    console.log(ssLL.lat())
+    document.getElementById('LatLng2').value = String(ssLL.lat()) + "," + String(ssLL.lng())
+    }    
+document.addEventListener('DOMContentLoaded',function(){
+    submitInput.addEventListener('click', getData, false);}
+    ,false)
 </script>
 
 <script async defer

@@ -1,20 +1,20 @@
-State,Site,Pad,Latitude,Longitude
-ALASKA,Pacific Spaceport Complex,No Name,57.43546,-152.33950
-CALIFORNIA,Vandenburg Air Force Base,Launch Complex 1,34.75613,-12062634
-CALIFORNIA,Vandenburg Air Force Base,Launch Complex 2,34.75568,-120.62246
-CALIFORNIA,Vandenburg Air Force Base,Launch Complex 4,34.75613,-120.62634
-CALIFORNIA,Vandenburg Air Force Base,Launch Complex 6,34.58176,-120.62616
-CALIFORNIA,Vandenburg Air Force Base,Launch Complex 8,34.57659,-120.63205
-CALIFORNIA,Vandenburg Air Force Base,Launch Complex 576,34.73968,-120.61914
-FLORIDA,Cape Canaveral,Complex 39A,28.60846,-80.60411
-FLORIDA,Cape Canaveral,Complex 39B,28.62742,-80.62092
-FLORIDA,Cape Canaveral,Complex 40,28.56237,-80.57737
-FLORIDA,Cape Canaveral,Complex 41,28.58397,-80.58279
-TEXAS,Boca Chica,No Name,25.99710,-97.15527
-TEXAS,West Texas,Suboribital Launch,31.42265,-104.75684
-TEXAS,West Texas,Blue Orgin Landing,31.45170,-104.76278
-VIRGINIA,Wallops Island,Pad O-A,37.83398,-75.48777
-VIRGINIA,Wallops Island,Pad O-B,37.83122,-75.49134
-NEW YORK,One World Trade Center,40.712742,-74.013382
-FRANCE,Paris,Eiffel Tower,48.8584,2.2945
-WASHINGTON,Seattle,Space Needle,47.6205,-122.3493
+Tag,State,Site,Pad,Latitude,Longitude
+AK - Pacific SC,ALASKA,Pacific Spaceport Complex,No Name,57.43546,-152.3395
+VAFB - 1,CALIFORNIA,Vandenburg Air Force Base,Launch Complex 1,34.75613,-12062634
+VAFB - 2,CALIFORNIA,Vandenburg Air Force Base,Launch Complex 2,34.75568,-120.62246
+VAFB - 4,CALIFORNIA,Vandenburg Air Force Base,Launch Complex 4,34.75613,-120.62634
+VAFB - 6,CALIFORNIA,Vandenburg Air Force Base,Launch Complex 6,34.58176,-120.62616
+VAFB - 8,CALIFORNIA,Vandenburg Air Force Base,Launch Complex 8,34.57659,-120.63205
+VAFB - 576,CALIFORNIA,Vandenburg Air Force Base,Launch Complex 576,34.73968,-120.61914
+Cape - 39A,FLORIDA,Cape Canaveral,Complex 39A,28.60846,-80.60411
+Cape - 39B,FLORIDA,Cape Canaveral,Complex 39B,28.62742,-80.62092
+Cape - 40,FLORIDA,Cape Canaveral,Complex 40,28.56237,-80.57737
+Cape - 41,FLORIDA,Cape Canaveral,Complex 41,28.58397,-80.58279
+TX - Boca Chica,TEXAS,Boca Chica,No Name,25.9971,-97.15527
+TX - Suborbital,TEXAS,West Texas,Suboribital Launch,31.42265,-104.75684
+TX - Blue Origin,TEXAS,West Texas,Blue Orgin Landing,31.4517,-104.76278
+Wallops - Pad O-A,VIRGINIA,Wallops Island,Pad O-A,37.83398,-75.48777
+Wallops - Pad O-B,VIRGINIA,Wallops Island,Pad O-B,37.83122,-75.49134
+World Trade Center,NEW YORK,New York City,One World Trade Center,40.712742,-74.013382
+Eiffel Tower,FRANCE,Paris,Eiffel Tower,48.8584,2.2945
+Space Needle,WASHINGTON,Seattle,Space Needle,47.6205,-122.3493
