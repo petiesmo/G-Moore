@@ -217,11 +217,8 @@ function getData(e){
 }
 //Changing Site selector populates the Form
 function SiteToForm(){
-    const ss2 = document.getElementById('ChooseSites').value
-    const ssLL = new google.maps.LatLng(ss2)
-    console.log(ss2.replace("{","").replace("}","").split(","))
-    console.log(ssLL.lat())
-    document.getElementById('LatLng2').value = String(ssLL.lat()) + "," + String(ssLL.lng())
+    const ss2 = JSON.parse(document.getElementById('ChooseSites').value)
+    document.getElementById('LatLng2').value = ss2.lat.toString() + "," + ss2.lng.toString()
     }    
 document.addEventListener('DOMContentLoaded',function(){
     submitInput.addEventListener('click', getData, false);}
