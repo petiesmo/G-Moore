@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Find Bearing with Declination">
+  <meta name="keywords" content="HTML, CSS, JavaScript">
+  <meta name="author" content="petiesmo">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+  <script src="./static/scripts.js"></script>
+<title>Moore's Maps</title>
+<style type="text/css">
+    #map{
+      height:600px;
+      width:90%;
+      box-sizing: content-box;
+      margin: auto;
+	}
+    .advertisement{
+    height: 100px;
+    width: 50%;
+    margin: auto;
+    }
+</style>
+</head>	
+<body>
+    <div class="advertisement" align="center"><span>Future Ad Goes Here</span></div>
+	<hr>
+    <div class="preamble" align="center">
+    <h1>Moore's Decline Map</h1>
+	<h4>Calculates Distance and Azimuth (with Declination correction)</h4>
+    <h5><i>Enter Start & End coordinates OR</i></h5> 
+    <h5><i>Drag the markers to desired location</i></h5>
+	<hr>
+    </div>
+<form id="LocationsForm" onsubmit='getData'>	
+<table>
+<div class="container">
+    <div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-3">
+        <fieldset style = "background-color: bisque;">
+		<!--Future TODO: Add geolocation?-->
+        <legend><strong>START</strong></legend>
+		<label for="LatLng1">Enter Lat,Long:</label><br>
+		<input type="text" id="LatLng1" name="LatLong1" value="0,0"><br>
+        </fieldset>
+        <!--label for="SiteSelector1">Choose a Site:</label-->
+        <div id='SiteSelector1'></div>
+	</div>
+    <div class="col-md-3">
+        <fieldset style="background-color: cadetblue;">
+            <legend><strong>END</strong></legend>
+            <label for="LatLng2">Enter Lat,Long:</label><br>
+            <input type="text" id="LatLng2" name="LatLong2" value="0,0"><br>
+        </fieldset>
+        <label for="SiteSelector2">Choose a Site:</label>
+        <!--Future TODO: Custom for each user, including saved locations -->
+        <div id='SiteSelector2'></div>
+    </div>
+    <div class = "col-md-4">
+        <fieldset style="background-color: silver;">
+        <legend><strong>RESULT</strong></legend>
+		<div id="origin"></div>
+		<div id="dest"></div>
+		<div id="dist"></div>
+        <div id="bearing"></div>
+        *Includes declination correction
+        </fieldset>
+        <!-- Future TODO: Button & function to save/export/email-->
+    </div>
+    <div class="col-md-1"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-3">
+        <input type="submit" value="Submit">
+        <input type="reset" value="Reset">
+        <div>
+        <div class="col-md-6"></div>
+    </div>
+</div>
+</form><hr>
+<br>
+<div id="map"></div>
+<hr>
+<div id="attribution">
+    <h4>Attributions:</h4>
+    <p>
+    Declination calculated by NOAA (www.ngdc.noaa.gov)<br>
+    Distance and Bearing calculated by GoogleMaps
+</p>
+</div>
+
+<script>
+ //Derived from the Google Maps API templates
+ let marker1, marker2;
+ let poly, geodesicPoly;
+ let map
+ //Default starting positions
+ var mapcenter = {lat: 45, lng: -100};  //Arbitrary
+ var pos2 = {lat: 40.714, lng: -74.006};  //One WTC, New York
+ var pos1 = {lat: 47.6205, lng: -122.3493};  //Space Needle, Seattle
+ var compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_0.png`
+ var degrees = 76  //TODO: Change this number!
+ var myDecline = 0
+ 
+ function initMap() {
+   map = new google.maps.Map(document.getElementById("map"), {
+	 zoom: 10,
+	 center: mapcenter
+   });
+    
+   //Create markers that can be dragged
+   marker1 = new google.maps.Marker({
+	 map,
+	 draggable: true,
+	 position: pos1,
+	 label: 'START'
+   });
+   marker2 = new google.maps.Marker({
+	 map,
+	 draggable: true,
+	 position: pos2,
+	 label: 'END'
+   });
+   refitBounds(map);
+   //Map updates once after marker dropped 
+   google.maps.event.addListener(marker1, "mouseup", updateMap);
+   google.maps.event.addListener(marker2, "mouseup", updateMap);
+   
+   //"Straight line"
+   poly = new google.maps.Polyline({
+	 strokeColor: "#FF0000",
+	 strokeOpacity: 1.0,
+	 strokeWeight: 3,
+	 map: map,
+   });
+   //Removed Spherical arc graphic
+   updateMap();
+ }
+ 
+ function refitBounds() {
+	//Resize map to fit around selected points  
+	const bounds = new google.maps.LatLngBounds(
+	marker1.position,
+	marker2.position
+   );
+    map.fitBounds(bounds);
+ }
+ 
+ async function getDecline(posA) {
+    //Retrieves a declination value (degrees) at given Lat,Long from API
+	console.log(posA.lat())
+    let calcParams = {
+        browserRequest:false,
+        magneticComponent:"d",
+        lat1: posA.lat(), lat1Hemisphere:"N",
+        lon1: posA.lng(), lon1Hemisphere:"W",
+        model:"WMM",
+        resultFormat:"json"}
+	const calcURL = new URL('https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination')
+    for(const [key,value] of Object.entries(calcParams)) {
+        calcURL.searchParams.append(key,value)}
+  	const response = await fetch(calcURL);
+    const magData = await response.json();
+    myDecline = magData.result[0].declination
+    console.log('Decline is:', myDecline)
+    return myDecline;
+ }
+
+async function updateMap() {
+   const p1 = marker1.position
+   const p2 = marker2.position
+   const path = [p1,p2];
+   //console.log(`Marker1: ${p1}, ${p2}`)
+   poly.setPath(path);
+   //geodesicPoly.setPath(path);
+   const dist_meters = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+   const dist_miles = dist_meters *0.621371192237 / 1000
+   const heading = google.maps.geometry.spherical.computeHeading(p1, p2);
+   const decline = await getDecline(p1)
+   let net_heading = modulo((heading + decline),360)
+   //Write to DOM
+   document.getElementById("origin").textContent = `START: ${p1.lat().toFixed(4)}, ${p1.lng().toFixed(4)} °N,°E`;
+   document.getElementById("dest").textContent = `END: ${p2.lat().toFixed(4)}, ${p2.lng().toFixed(4)} °N,°E`;
+   document.getElementById("bearing").textContent = `Heading (Azimuth*): ${net_heading.toFixed(4)}°`;
+   document.getElementById("dist").textContent = `Distance: ${(dist_miles).toFixed(3)} miles`;
+   //document.getElementById("orighdg").textContent = `Heading was (at Origin): ${heading.toFixed(4)}°`;
+   //document.getElementById("decline").textContent = `Declination was (at Origin): ${decline.toFixed(4)}°`;
+ }
+</script>
+
+<script>    
+//Acquire Positions 1,2 data from the form
+const forms = document.querySelectorAll('form')
+const submitInput = forms[0].querySelector('input[type="submit"]')
+
+function getData(e){
+    e.preventDefault();
+    const formdata = new FormData(forms[0])
+    /*Future TODO: input validation for LL1, LL2*/
+    var LL1 = formdata.get("LatLong1").split(",")		
+    var LL2 = formdata.get("LatLong2").split(",")
+    const p1 = new google.maps.LatLng(LL1[0],LL1[1])
+    const p2 = new google.maps.LatLng(LL2[0],LL2[1])
+    marker1.setPosition(p1)
+    marker2.setPosition(p2)
+    //marker1.setIcon(compassrose = `https://www.ngdc.noaa.gov/geomag/image/compass/compass_76.png`)
+    //marker1.icon.anchor=(0,0);
+    //marker1.icon.scaledSize=(5,5);
+    updateMap()
+    refitBounds()
+}
+//Changing Site selector populates the Form
+function SiteToForm(){
+    const ss2 = JSON.parse(document.getElementById('ChooseSites').value)
+    document.getElementById('LatLng2').value = ss2.lat.toString() + "," + ss2.lng.toString()
+    }    
+document.addEventListener('DOMContentLoaded',function(){
+    submitInput.addEventListener('click', getData, false);}
+    ,false)
+</script>
+
+<script async defer
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8OhoxKqPqPifoJM4bh0ztgUjxt71VGFw&callback=initMap&libraries=geometry">
+</script>
+</body>
+</html>
